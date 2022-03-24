@@ -2,7 +2,7 @@ import "./styles/App.css";
 import twitterLogo from "./assets/twitter-logo.svg";
 import React from "react";
 import { useConnectWallet } from "./hooks/use-connect-wallet.hook";
-
+import { useMintMyEpicNFT } from "./hooks/use-mint-myepicnft.hook";
 // Constants
 const TWITTER_HANDLE = "_buildspace";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
@@ -11,6 +11,8 @@ const TOTAL_MINT_COUNT = 50;
 
 const App = () => {
   const { connectWallet, currentAccount } = useConnectWallet();
+  const { mintNFT } = useMintMyEpicNFT();
+
   // Render Methods
   const renderNotConnectedContainer = () => (
     <button
@@ -32,7 +34,10 @@ const App = () => {
           {currentAccount == null ? (
             renderNotConnectedContainer()
           ) : (
-            <button onClick={null} className="cta-button connect-wallet-button">
+            <button
+              onClick={mintNFT}
+              className="cta-button connect-wallet-button"
+            >
               Mint NFT
             </button>
           )}

@@ -7,12 +7,69 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "hardhat/console.sol";
 
+import {Base64} from "./libraries/Base64.sol";
+
 // We inherit the contract we imported. This means we'll have access
 // to the inherited contract's methods.
 contract MyEpicNFT is ERC721URIStorage {
     // Magic given to us by OpenZeppelin to help us keep track of tokenIds.
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+
+    string baseSvg =
+        "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='black' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
+
+    string[] firstWords = [
+        "Political",
+        "Woozy",
+        "Nutritious",
+        "Acidic",
+        "Imminent",
+        "Wealthy",
+        "Doubtful",
+        "Faulty",
+        "Vivacious",
+        "Flaky",
+        "Godly",
+        "Entire",
+        "Romantic",
+        "Mindless",
+        "Electronic"
+    ];
+    string[] secondWords = [
+        "Realistic",
+        "Calculating",
+        "Melted",
+        "Mean",
+        "Impressive",
+        "Evanescent",
+        "Boundless",
+        "Tawdry",
+        "Confused",
+        "Alive",
+        "Furtive",
+        "Omniscient",
+        "Puffy",
+        "Muddled",
+        "Educational"
+    ];
+    string[] thirdWords = [
+        "Engine",
+        "Session",
+        "Music",
+        "Engineering",
+        "Historian",
+        "Worker",
+        "Throat",
+        "Security",
+        "Possession",
+        "Goal",
+        "Topic",
+        "Honey",
+        "Girl",
+        "Way",
+        "Bird"
+    ];
 
     // We need to pass the name of our NFTs token and its symbol.
     constructor() ERC721("SquareNFT", "SQUARE") {
@@ -31,13 +88,85 @@ contract MyEpicNFT is ERC721URIStorage {
             newItemId,
             msg.sender
         );
-        // Set the NFTs data.
-        _setTokenURI(
-            newItemId,
-            "data:application/json;base64,ewogICAgIm5hbWUiOiAiRXBpY0xvcmRIYW1idXJnZXIiLAogICAgImRlc2NyaXB0aW9uIjogIkFuIE5GVCBmcm9tIHRoZSBoaWdobHkgYWNjbGFpbWVkIHNxdWFyZSBjb2xsZWN0aW9uIiwKICAgICJpbWFnZSI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSEJ5WlhObGNuWmxRWE53WldOMFVtRjBhVzg5SW5oTmFXNVpUV2x1SUcxbFpYUWlJSFpwWlhkQ2IzZzlJakFnTUNBek5UQWdNelV3SWo0S0lDQWdJRHh6ZEhsc1pUNHVZbUZ6WlNCN0lHWnBiR3c2SUhkb2FYUmxPeUJtYjI1MExXWmhiV2xzZVRvZ2MyVnlhV1k3SUdadmJuUXRjMmw2WlRvZ01UUndlRHNnZlR3dmMzUjViR1UrQ2lBZ0lDQThjbVZqZENCM2FXUjBhRDBpTVRBd0pTSWdhR1ZwWjJoMFBTSXhNREFsSWlCbWFXeHNQU0ppYkdGamF5SWdMejRLSUNBZ0lEeDBaWGgwSUhnOUlqVXdKU0lnZVQwaU5UQWxJaUJqYkdGemN6MGlZbUZ6WlNJZ1pHOXRhVzVoYm5RdFltRnpaV3hwYm1VOUltMXBaR1JzWlNJZ2RHVjRkQzFoYm1Ob2IzSTlJbTFwWkdSc1pTSStSWEJwWTB4dmNtUklZVzFpZFhKblpYSThMM1JsZUhRK0Nqd3ZjM1puUGc9PSIKfQ=="
+
+        string memory combinedWord = string(
+            abi.encodePacked(
+                pickRandomFirstWord(newItemId),
+                pickRandomSecondWord(newItemId),
+                pickRandomThirdWord(newItemId)
+            )
         );
+        string memory finalSVG = string(
+            abi.encodePacked(baseSvg, combinedWord, "</text></svg>")
+        );
+
+        string memory json = string(
+            abi.encodePacked(
+                '{ "name": "',
+                combinedWord,
+                '", "description": "An NFT from the highly acclaimed square collection", ',
+                '"image": "data:image/svg+xml;base64,',
+                Base64.encode(bytes(finalSVG)),
+                '" }'
+            )
+        );
+
+        string memory tokenURI = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(bytes(json))
+            )
+        );
+
+        console.log("SVG: %s", finalSVG);
+        console.log("TokenURI: %s", tokenURI);
+
+        // Set the NFTs data.
+        _setTokenURI(newItemId, tokenURI);
 
         // Increment the counter for when the next NFT is minted.
         _tokenIds.increment();
+    }
+
+    function pickRandomWord(
+        uint256 tokenID,
+        string[] memory words,
+        string memory seedPhrase
+    ) public pure returns (string memory) {
+        // seed the random generator
+        uint256 rand = random(
+            string(abi.encodePacked(seedPhrase, Strings.toString(tokenID)))
+        );
+        // Squash the # between 0 and the length of the array to avoid going out of bounds.
+        rand = rand % words.length;
+        return words[rand];
+    }
+
+    function pickRandomFirstWord(uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        return pickRandomWord(tokenId, firstWords, "FIRST_WORD");
+    }
+
+    function pickRandomSecondWord(uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        return pickRandomWord(tokenId, secondWords, "SECOND_WORD");
+    }
+
+    function pickRandomThirdWord(uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        return pickRandomWord(tokenId, thirdWords, "THIRD_WORD");
+    }
+
+    function random(string memory input) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(input)));
     }
 }

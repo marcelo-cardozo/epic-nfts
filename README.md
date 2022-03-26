@@ -1,15 +1,21 @@
-# Basic Sample Hardhat Project
+# Epic NFTs
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+![Screenshot](images/screenshot.png)
 
-Try running some of the following tasks:
+## Deploy contract locally
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+- Run `npx hardhat node` in a terminal
+- Deploy contract to hardhat test network doing: `npx hardhat run scripts/deploy.js --network localhost`
+- Connect metamask to local hardhat test network
+- Update contract address inside `App.js`
+- Update contract `abi` with the generated json located at `artifacts/contracts/MyEpicNFT.sol/MyEpicNFT.json`
+- To run the ReactJS application execute `npm start` inside `react-app` folder
+
+## Deploy contract to Rinkeby Ethereum Test Network
+
+- Update `hardhat.config.js` with the actual rinkeby url and ethereum account
+- Run `npx hardhat run scripts/deploy.js --network rinkeby`
+- Select rinkeby network in metamask
+- Update contract address inside `MyEpicNFT.constants.js`
+- Update contract `abi` with the generated json located at `artifacts/contracts/MyEpicNFT.sol/MyEpicNFT.json`
+- To run the ReactJS application execute `npm start` inside `react-app` folder

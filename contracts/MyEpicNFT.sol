@@ -16,7 +16,7 @@ contract MyEpicNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     event NewEpicNFTMinted(address sender, uint256 tokenId);
-    uint16 public mintLimit = 50;
+    uint256 public mintLimit = 50;
 
     string[] firstWords = [
         "Political",
@@ -82,7 +82,7 @@ contract MyEpicNFT is ERC721URIStorage {
         // Get the current tokenId, this starts at 0.
         uint256 newItemId = _tokenIds.current();
 
-        require(newItemId <= mintLimit, "No more NFTS availables");
+        require(newItemId <= mintLimit, "No more NFTs availables");
 
         // Actually mint the NFT to the sender using msg.sender.
         _safeMint(msg.sender, newItemId);

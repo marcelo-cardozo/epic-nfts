@@ -1,5 +1,5 @@
 import abi from "./MyEpicNFT.json";
 
 export const myEpicNFTContractAddress =
-  "0x03188A0c5143083175b76F196DFb930a3BE157e0";
+  "0xA280558314A41FF95620080Cc67eAdc82391c1D1";
 export const myEpicNFTContractABI = abi.abi;

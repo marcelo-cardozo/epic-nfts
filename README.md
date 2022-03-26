@@ -19,3 +19,9 @@
 - Update contract address inside `MyEpicNFT.constants.js`
 - Update contract `abi` with the generated json located at `artifacts/contracts/MyEpicNFT.sol/MyEpicNFT.json`
 - To run the ReactJS application execute `npm start` inside `react-app` folder
+
+### Verify contact on Etherscan
+
+- `npx hardhat clean `
+- `npx hardhat compile`
+- `npx hardhat verify CONTRACT_ADDRESS --network rinkeby`

@@ -1,8 +1,10 @@
 import "./styles/App.css";
 import twitterLogo from "./assets/twitter-logo.svg";
-import React from "react";
+import React, { useEffect } from "react";
 import { useConnectWallet } from "./hooks/use-connect-wallet.hook";
 import { useMintMyEpicNFT } from "./hooks/use-mint-myepicnft.hook";
+import { useMyEpicNFTContract } from "./hooks/use-myepicnft-contract.hook";
+import { myEpicNFTContractAddress } from "./MyEpicNFT/MyEpicNFT.constants";
 // Constants
 const TWITTER_HANDLE = "_buildspace";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
@@ -12,6 +14,7 @@ const TOTAL_MINT_COUNT = 50;
 const App = () => {
   const { connectWallet, currentAccount } = useConnectWallet();
   const { mintNFT } = useMintMyEpicNFT();
+  const { contract: epicNFTContract } = useMyEpicNFTContract();
 
   // Render Methods
   const renderNotConnectedContainer = () => (
@@ -22,6 +25,17 @@ const App = () => {
       Connect to Wallet
     </button>
   );
+
+  useEffect(() => {
+    if (epicNFTContract) {
+      epicNFTContract.on("NewEpicNFTMinted", (from, tokenId) => {
+        console.log(from, tokenId.toNumber());
+        alert(
+          `Hey there! We've minted your NFT. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: <https://testnets.opensea.io/assets/${myEpicNFTContractAddress}/${tokenId.toNumber()}>`
+        );
+      });
+    }
+  }, [epicNFTContract]);
 
   return (
     <div className="App">

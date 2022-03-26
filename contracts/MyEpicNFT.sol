@@ -15,9 +15,8 @@ contract MyEpicNFT is ERC721URIStorage {
     // Magic given to us by OpenZeppelin to help us keep track of tokenIds.
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-
-    string baseSvg =
-        "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='black' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
+    event NewEpicNFTMinted(address sender, uint256 tokenId);
+    uint16 public mintLimit = 50;
 
     string[] firstWords = [
         "Political",
@@ -71,6 +70,8 @@ contract MyEpicNFT is ERC721URIStorage {
         "Bird"
     ];
 
+    string[] availableColors = ["black", "blue", "green", "red", "purple"];
+
     // We need to pass the name of our NFTs token and its symbol.
     constructor() ERC721("SquareNFT", "SQUARE") {
         console.log("This is my NFT Epic Trips contract. Woah!");
@@ -80,6 +81,8 @@ contract MyEpicNFT is ERC721URIStorage {
     function makeAnEpicNFT() public {
         // Get the current tokenId, this starts at 0.
         uint256 newItemId = _tokenIds.current();
+
+        require(newItemId <= mintLimit, "No more NFTS availables");
 
         // Actually mint the NFT to the sender using msg.sender.
         _safeMint(msg.sender, newItemId);
@@ -96,9 +99,8 @@ contract MyEpicNFT is ERC721URIStorage {
                 pickRandomThirdWord(newItemId)
             )
         );
-        string memory finalSVG = string(
-            abi.encodePacked(baseSvg, combinedWord, "</text></svg>")
-        );
+        string memory color = pickRandomColor(newItemId);
+        string memory finalSVG = getSVG(color, combinedWord);
 
         string memory json = string(
             abi.encodePacked(
@@ -126,13 +128,19 @@ contract MyEpicNFT is ERC721URIStorage {
 
         // Increment the counter for when the next NFT is minted.
         _tokenIds.increment();
+
+        emit NewEpicNFTMinted(msg.sender, newItemId);
+    }
+
+    function getTotalNFTsMintedSoFar() public view returns (uint256) {
+        return _tokenIds.current();
     }
 
     function pickRandomWord(
         uint256 tokenID,
         string[] memory words,
         string memory seedPhrase
-    ) public pure returns (string memory) {
+    ) private pure returns (string memory) {
         // seed the random generator
         uint256 rand = random(
             string(abi.encodePacked(seedPhrase, Strings.toString(tokenID)))
@@ -142,8 +150,33 @@ contract MyEpicNFT is ERC721URIStorage {
         return words[rand];
     }
 
+    function getSVG(string memory color, string memory phrase)
+        private
+        pure
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='",
+                    color,
+                    "' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>",
+                    phrase,
+                    "</text></svg>"
+                )
+            );
+    }
+
+    function pickRandomColor(uint256 tokenId)
+        private
+        view
+        returns (string memory)
+    {
+        return pickRandomWord(tokenId, availableColors, "COLOR");
+    }
+
     function pickRandomFirstWord(uint256 tokenId)
-        public
+        private
         view
         returns (string memory)
     {
@@ -151,7 +184,7 @@ contract MyEpicNFT is ERC721URIStorage {
     }
 
     function pickRandomSecondWord(uint256 tokenId)
-        public
+        private
         view
         returns (string memory)
     {
@@ -159,14 +192,14 @@ contract MyEpicNFT is ERC721URIStorage {
     }
 
     function pickRandomThirdWord(uint256 tokenId)
-        public
+        private
         view
         returns (string memory)
     {
         return pickRandomWord(tokenId, thirdWords, "THIRD_WORD");
     }
 
-    function random(string memory input) internal pure returns (uint256) {
+    function random(string memory input) private pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(input)));
     }
 }

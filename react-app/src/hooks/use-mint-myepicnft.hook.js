@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMyEpicNFTContract } from "./use-myepicnft-contract.hook";
 
-export function useMintMyEpicNFT({ onSuccess } = {}) {
+export function useMintMyEpicNFT({ onMined } = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isRequestingTransaction, setIsRequestingTransaction] = useState(false);
   const { contract: myEpicNFTContract } = useMyEpicNFTContract();
-  const onSuccessRef = useRef();
+  const onMinedRef = useRef();
 
   useEffect(() => {
-    onSuccessRef.current = onSuccess;
-  }, [onSuccess]);
+    onMinedRef.current = onMined;
+  }, [onMined]);
 
   const mintNFT = useCallback(async () => {
     if (!myEpicNFTContract) {
@@ -32,8 +32,8 @@ export function useMintMyEpicNFT({ onSuccess } = {}) {
         `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
       );
 
-      if (onSuccessRef.current) {
-        await onSuccessRef.current(myEpicNFTContract);
+      if (onMinedRef.current) {
+        await onMinedRef.current(myEpicNFTContract);
       }
     } catch (error) {
       console.log(error);
